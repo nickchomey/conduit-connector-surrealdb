@@ -1,4 +1,4 @@
-module github.com/conduitio/conduit-connector-connectorname
+module github.com/nickchomey/conduit-connector-surrealdb
 
 go 1.23
 
@@ -7,8 +7,11 @@ require (
 	github.com/conduitio/conduit-connector-sdk v0.10.1
 	github.com/golangci/golangci-lint v1.61.0
 	github.com/matryer/is v1.4.1
+	github.com/surrealdb/surrealdb.go v0.2.2-0.20240923142710-3d48437c7f05
 	mvdan.cc/gofumpt v0.7.0
 )
+
+replace github.com/surrealdb/surrealdb.go => /home/nick/tool-dev/conduitproject/connectors/surrealdb.go
 
 require (
 	4d63.com/gocheckcompilerdirectives v1.2.1 // indirect
@@ -57,6 +60,7 @@ require (
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/firefart/nonamedreturns v1.0.5 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/fzipp/gocyclo v0.6.0 // indirect
 	github.com/ghostiam/protogetter v0.3.6 // indirect
 	github.com/go-critic/go-critic v0.11.4 // indirect
@@ -83,6 +87,7 @@ require (
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gordonklaus/ineffassign v0.1.0 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/gostaticanalysis/analysisutil v0.7.1 // indirect
 	github.com/gostaticanalysis/comment v1.4.2 // indirect
 	github.com/gostaticanalysis/forcetypeassert v0.1.0 // indirect
@@ -188,6 +193,7 @@ require (
 	github.com/ultraware/funlen v0.1.0 // indirect
 	github.com/ultraware/whitespace v0.1.1 // indirect
 	github.com/uudashr/gocognit v1.1.3 // indirect
+	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xen0n/gosmopolitan v1.2.2 // indirect
 	github.com/yagipy/maintidx v1.0.0 // indirect
 	github.com/yeya24/promlinter v0.3.0 // indirect
