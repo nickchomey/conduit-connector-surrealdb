@@ -1,10 +1,10 @@
 package main
 
 import (
-	connectorname "github.com/conduitio/conduit-connector-connectorname"
+	surrealdb "github.com/nickchomey/conduit-connector-surrealdb"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 )
 
 func main() {
-	sdk.Serve(connectorname.Connector)
+	sdk.Serve(surrealdb.Connector)
 }

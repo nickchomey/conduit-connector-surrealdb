@@ -1,4 +1,4 @@
-package connectorname
+package surrealdb
 
 import (
 	sdk "github.com/conduitio/conduit-connector-sdk"
@@ -11,10 +11,10 @@ var version = "(devel)"
 // Specification returns the connector's specification.
 func Specification() sdk.Specification {
 	return sdk.Specification{
-		Name:        "connectorname",
-		Summary:     "<describe your connector>",
-		Description: "<describe your connector in detail>",
+		Name:        "surrealdb",
+		Summary:     "A conduit connector for SurrealDB",
+		Description: "Destination connector for SurrealDB that imports data from Conduit and can create, update, and delete records as well as graph relationships defined in the schema registry",
 		Version:     version,
-		Author:      "<your name>",
+		Author:      "Nick Chomey",
 	}
 }
