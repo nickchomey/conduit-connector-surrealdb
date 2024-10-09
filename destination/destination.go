@@ -71,33 +71,38 @@ func (d *Destination) Open(ctx context.Context) error {
 	if err != nil {
 		sdk.Logger(ctx).Error().Msg("Failed to create SurrealDB client: " + err.Error())
 		return fmt.Errorf("failed to create SurrealDB client: %w", err)
-	} else {
-		sdk.Logger(ctx).Info().Msg("Created SurrealDB client")
 	}
 
-	authData := &models.Auth{
+	if err = db.Use(d.config.Namespace, d.config.Database); err != nil {
+		sdk.Logger(ctx).Error().Msg("Failed to select namespace and database: " + err.Error())
+		return fmt.Errorf("failed to select namespace and database: %w", err)
+	}
+	authData := &surrealdb.Auth{
 		Username: d.config.Username,
 		Password: d.config.Password,
 		// Database:  d.config.Database,
 		// Namespace: d.config.Namespace,
 		// Scope:     d.config.Scope,
 	}
-	if _, err = db.Signin(authData); err != nil {
+
+	token, err := db.SignIn(authData)
+	if err != nil {
 		sdk.Logger(ctx).Error().Msg("Failed to sign in to SurrealDB: " + err.Error())
 		return fmt.Errorf("failed to sign in to SurrealDB: %w", err)
-	} else {
-		sdk.Logger(ctx).Info().Msg("Signed in to SurrealDB")
 	}
 
-	sdk.Logger(ctx).Info().Msg("Try to use namespace and database: " + d.config.Namespace + " " + d.config.Database)
-
-	if _, err = db.Use(d.config.Namespace, d.config.Database); err != nil {
-		sdk.Logger(ctx).Error().Msg("Failed to select namespace and database: " + err.Error())
-		return fmt.Errorf("failed to select namespace and database: %w", err)
-	} else {
-		sdk.Logger(ctx).Info().Msg("Using namespace and database: " + d.config.Namespace + " " + d.config.Database)
+	// Check token validity. This is not necessary if you called `SignIn` before. This authenticates the `db` instance too if sign in was
+	// not previously called
+	if err := db.Authenticate(token); err != nil {
+		panic(err)
 	}
-	sdk.Logger(ctx).Info().Msg("Successfully connected to SurrealDB")
+
+	// And we can later on invalidate the token if desired
+	defer func(token string) {
+		if err := db.Invalidate(); err != nil {
+			panic(err)
+		}
+	}(token)
 
 	// ********** sample queries to test connection *****************************************************
 
@@ -365,7 +370,8 @@ func (d *Destination) insert(ctx context.Context, tableName string, payloads []*
 
 	// This only works partially. Problem is that bulk insert doesnt support using `ON DUPLICATE KEY UPDATE`, which can be used for single inserts. So if a bulk insert has an existing key, the whole batch will fail.
 	// Given that Bulk Upsert doesnt exist yet (https://github.com/surrealdb/surrealdb/pull/4455), perhaps should make this loop through all records and insert one by one for now, so that at least it'll work rather than fail? Or, if we're just doing one by one, should normal Upsert be used instead of Insert?
-	if _, err := d.db.Insert(tableName, payloads); err != nil {
+
+	if _, err := surrealdb.Insert[interface{}](d.db, models.Table(tableName), payloads); err != nil {
 		sdk.Logger(ctx).Error().Msg("Failed to insert record: " + err.Error())
 		return fmt.Errorf("failed to insert record: %w", err)
 	}
@@ -388,7 +394,7 @@ func (d *Destination) update(ctx context.Context, tableName string, payloads []*
 		}
 
 		//TODO: Update function doesnt actually seem to work. Nor does upsert or merge.
-		if _, err := d.db.Update(tableName, payload); err != nil {
+		if _, err := surrealdb.Update[interface{}](d.db, models.Table(tableName), payload); err != nil {
 			sdk.Logger(ctx).Error().Msg("Failed to insert record: " + err.Error())
 			return fmt.Errorf("failed to insert record: %w", err)
 		}
@@ -411,7 +417,7 @@ func (d *Destination) delete(ctx context.Context, tableName string, payloads []*
 			return fmt.Errorf("unexpected type for payload: %T", *payload)
 		}
 
-		if _, err := d.db.Delete(tableName); err != nil {
+		if err := surrealdb.Delete(d.db, models.Table(tableName)); err != nil {
 			sdk.Logger(ctx).Error().Msg("Failed to insert record: " + err.Error())
 			return fmt.Errorf("failed to insert record: %w", err)
 		}

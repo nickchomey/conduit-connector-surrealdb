@@ -24,10 +24,10 @@ type Config struct {
 	Username string `json:"username" validate:"required"`
 	// Password is the password for the SurrealDB server.
 	Password string `json:"password" validate:"required"`
-	// Database is the database name for the SurrealDB server.
-	Database string `json:"database" validate:"required"`
 	// Namespace is the namespace for the SurrealDB server.
 	Namespace string `json:"namespace" validate:"required"`
+	// Database is the database name for the SurrealDB server.
+	Database string `json:"database" validate:"required"`
 	// Scope is the scope for the SurrealDB server.
 	Scope string `json:"scope" validate:"required"`
 }

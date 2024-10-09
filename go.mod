@@ -7,7 +7,7 @@ require (
 	github.com/conduitio/conduit-connector-sdk v0.10.1
 	github.com/golangci/golangci-lint v1.61.0
 	github.com/matryer/is v1.4.1
-	github.com/surrealdb/surrealdb.go v0.2.2-0.20240923142710-3d48437c7f05
+	github.com/surrealdb/surrealdb.go v0.2.2-0.20240923142710-5bbb7b1e2a1b63df0c9f5008fec9bb24259dcf7f
 	mvdan.cc/gofumpt v0.7.0
 )
 
@@ -76,6 +76,7 @@ require (
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/gofrs/flock v0.12.1 // indirect
+	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golangci/dupl v0.0.0-20180902072040-3e9179ac440a // indirect
 	github.com/golangci/gofmt v0.0.0-20240816233607-d8596aa466a9 // indirect

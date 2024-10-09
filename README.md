@@ -1,36 +1,44 @@
 # Conduit Connector for <resource>
 
-[Conduit](https://conduit.io) connector for <resource>.
+[Conduit](https://conduit.io) connector for [SurrealDB](https://surrealdb.com/).
 
 ## How to build?
 
-Run `make build` to build the connector.
+Run `make build` to build the connector, or `make build-debug` if you want to step debug it.
 
 ## Testing
+
+**Note, currently there are no tests**
 
 Run `make test` to run all the unit tests. Run `make test-integration` to run the integration tests.
 
 The Docker compose file at `test/docker-compose.yml` can be used to run the required resource locally.
 
-## Source
-
-A source connector pulls data from an external resource and pushes it to downstream resources via Conduit.
-
-### Configuration
+## Configuration
 
 | name                  | description                           | required | default value |
 |-----------------------|---------------------------------------|----------|---------------|
-| `source_config_param` | Description of `source_config_param`. | true     | 1000          |
+| `URL` | URL is the connection string for the SurrealDB server. | true     | ""     |
+| `Username` | Username is the username for the SurrealDB server. | true     | ""        |
+| `Password` | Password is the password for the SurrealDB server. | true     | ""          |
+| `Namespace` | Namespace is the namespace for the SurrealDB server. | true     | ""          |
+| `Database` | Database is the database name for the SurrealDB server. | true     | ""          |
+| `Scope` | Scope is the scope for the SurrealDB server. | true     | ""          |
 
-## Destination
+### Source
+
+There is currently no Source connector
+
+
+
+### Destination
 
 A destination connector pushes data from upstream resources to an external resource via Conduit.
 
-### Configuration
 
 | name                       | description                                | required | default value |
 |----------------------------|--------------------------------------------|----------|---------------|
-| `destination_config_param` | Description of `destination_config_param`. | true     | 1000          |
+| `DeleteOldKey` | Primary key will be set to "id". Specify whether you want to keep the source Primary Key column as well. | false     | false          |
 
 ## Known Issues & Limitations
 
