@@ -7,11 +7,9 @@ require (
 	github.com/conduitio/conduit-connector-sdk v0.10.1
 	github.com/golangci/golangci-lint v1.61.0
 	github.com/matryer/is v1.4.1
-	github.com/surrealdb/surrealdb.go v0.2.2-0.20240923142710-5bbb7b1e2a1b63df0c9f5008fec9bb24259dcf7f
+	github.com/surrealdb/surrealdb.go v0.2.2-0.20241009120630-5bbb7b1e2a1b
 	mvdan.cc/gofumpt v0.7.0
 )
-
-replace github.com/surrealdb/surrealdb.go => /home/nick/tool-dev/conduitproject/connectors/surrealdb.go
 
 require (
 	4d63.com/gocheckcompilerdirectives v1.2.1 // indirect

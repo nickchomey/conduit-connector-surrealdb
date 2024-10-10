@@ -22,6 +22,7 @@ type Destination struct {
 
 	config Config
 	db     *surrealdb.DB
+	token  string
 }
 
 func NewDestination() sdk.Destination {
@@ -54,12 +55,6 @@ func (d *Destination) Configure(ctx context.Context, cfg config.Config) error {
 	return nil
 }
 
-type User struct {
-	ID      int    `json:"id,omitempty"`
-	Name    string `json:"name"`
-	Surname string `json:"surname"`
-}
-
 func (d *Destination) Open(ctx context.Context) error {
 	// Open is called after Configure to signal the plugin it can prepare to
 	// start writing records. If needed, the plugin should open connections in
@@ -77,6 +72,7 @@ func (d *Destination) Open(ctx context.Context) error {
 		sdk.Logger(ctx).Error().Msg("Failed to select namespace and database: " + err.Error())
 		return fmt.Errorf("failed to select namespace and database: %w", err)
 	}
+
 	authData := &surrealdb.Auth{
 		Username: d.config.Username,
 		Password: d.config.Password,
@@ -91,167 +87,7 @@ func (d *Destination) Open(ctx context.Context) error {
 		return fmt.Errorf("failed to sign in to SurrealDB: %w", err)
 	}
 
-	// Check token validity. This is not necessary if you called `SignIn` before. This authenticates the `db` instance too if sign in was
-	// not previously called
-	if err := db.Authenticate(token); err != nil {
-		panic(err)
-	}
-
-	// And we can later on invalidate the token if desired
-	defer func(token string) {
-		if err := db.Invalidate(); err != nil {
-			panic(err)
-		}
-	}(token)
-
-	// ********** sample queries to test connection *****************************************************
-
-	/* // Define user struct
-	user := User{
-		Name:    "John",
-		Surname: "Doe",
-	}
-	*/
-
-	// Change userID to be a string directly
-	// userID := fmt.Sprintf("%d", rand.Intn(1000)+1)
-	/* userID := rand.Intn(100000000000) + 1
-	user := User{
-		Name:    "John",
-		Surname: "Doe",
-		ID:      userID,
-		// ID: 769876,
-	}
-
-	// Insert user
-	_, err = db.Insert("user", user)
-	if err != nil {
-		sdk.Logger(ctx).Error().Msg("Failed to create user: " + err.Error())
-		return fmt.Errorf("failed to create user: %w", err)
-	} */
-	//  else {
-
-	// 	// [map
-	// 	// [
-	// 	// 	id:{
-	// 	// 		Number:8
-	// 	// 		Content:[user 4728]
-	// 	// 	}
-	// 	// 	name:John
-	// 	// 	surname:Doe
-	// 	// 	]
-	// 	// ]
-	// 	// Unmarshal data
-	// 	// createdUser := make([]User, 1)
-	// 	// err = marshal.Unmarshal(response, &createdUser)
-	// 	// if err != nil {
-	// 	// 	// log the error
-	// 	// 	sdk.Logger(ctx).Error().Msg("Failed to unmarshal created user data: " + err.Error())
-	// 	// 	panic(err)
-	// 	// }
-	// 	// // log the created user
-	// 	// sdk.Logger(ctx).Info().Msg(fmt.Sprintf("Created user: %v", createdUser))
-
-	// 	/* // Convert response to map[string]interface{}
-	// 	convertedResponse := make(map[string]interface{})
-	// 	if respMap, ok := response.(map[string]interface{}); ok {
-	// 		for key, value := range respMap {
-	// 			strKey := fmt.Sprintf("%v", key)
-	// 			convertedResponse[strKey] = value
-	// 		}
-	// 	} else {
-	// 		sdk.Logger(ctx).Error().Msg("Failed to assert response type")
-	// 	}
-
-	// 	responseJSON, err := json.Marshal(convertedResponse)
-	// 	if err != nil {
-	// 		sdk.Logger(ctx).Error().Msg("Failed to marshal response: " + err.Error())
-	// 	} else {
-	// 		sdk.Logger(ctx).Info().Msg("Response: " + string(responseJSON))
-	// 	} */
-	// }
-
-	// sdk.Logger(ctx).Info().Msg(fmt.Sprintf("Created user: %d", user.ID))
-
-	/* // log data response
-	sdk.Logger(ctx).Info().Msg(fmt.Sprintf("Data response: %v", data))
-	*/
-	// Unmarshal data
-	/* user, err = marshal.SmartUnmarshal[User](marshal.SmartMarshal(s.db.Create, user)) */
-
-	// data, err = marshal.SmartUnmarshal[User](db.Select(user[0].ID))
-
-	// createdUser, err = marshal.SmartUnmarshal(data, err)
-	// if err != nil {
-	// 	sdk.Logger(ctx).Error().Msg("Failed to unmarshal created user data: " + err.Error())
-	// 	return fmt.Errorf("failed to unmarshal created user data: %w", err)
-	// }
-
-	// Unmarshal data
-	// selectedUser := new(User)
-	// err = marshal.Unmarshal(data, &selectedUser)
-	// if err != nil {
-	// 	sdk.Logger(ctx).Error().Msg("Failed to unmarshal selected user data: " + err.Error())
-	// 	return fmt.Errorf("failed to unmarshal selected user data: %w", err)
-	// }
-
-	// Change part/parts of user
-	/* changes := map[string]string{"name": "Jane"}
-
-	// Update user
-	if _, err = db.Update(user.ID, changes); err != nil {
-		sdk.Logger(ctx).Error().Msg("Failed to update user: " + err.Error())
-		return fmt.Errorf("failed to update user: %w", err)
-	} else {
-		sdk.Logger(ctx).Info().Msg("Updated user: " + user.ID + " with changes name: " + changes["name"])
-	} */
-
-	/* if _, err = db.Query("UPDATE user:"+fmt.Sprintf("%d", user.ID)+" SET name = 'Jane'", nil); err != nil {
-
-		sdk.Logger(ctx).Error().Msg("Failed to update user: " + err.Error())
-		return fmt.Errorf("failed to update user: %w", err)
-	}
-	sdk.Logger(ctx).Info().Msg("Updated user: " + fmt.Sprintf("user:%d", user.ID) + " with changes name: " + user.Name) */
-
-	// // ID      models.RecordID `json:"id,omitempty"`
-	// type User2 struct {
-	// 	Name    string `json:"name"`
-	// 	Surname string `json:"surname"`
-	// }
-
-	// user2 := User2{
-	// 	Name:    "Jane",
-	// 	Surname: "Smith",
-	// }
-
-	// // id := *models.NewRecordID("user", user.ID)
-	// id := "user:769876"
-	// sdk.Logger(ctx).Info().Msg(fmt.Sprintf("Generated RecordID: %v", id))
-
-	// response, err := db.Update(id, user2)
-	// if err != nil {
-	// 	sdk.Logger(ctx).Error().Msg("Failed to update user: " + err.Error())
-	// 	return fmt.Errorf("failed to update user: %w", err)
-	// }
-
-	// // log the response
-	// responseJSON, err := json.Marshal(response)
-	// if err != nil {
-	// 	sdk.Logger(ctx).Error().Msg("Failed to marshal response: " + err.Error())
-	// } else {
-	// 	sdk.Logger(ctx).Info().Msg("Response: " + string(responseJSON))
-	// }
-
-	/* if selectedUser, err := db.Query("SELECT * FROM "+user.ID, nil); err != nil {
-
-		sdk.Logger(ctx).Error().Msg("Failed to query user: " + err.Error())
-		return fmt.Errorf("failed to query user: %w", err)
-	} else {
-		sdk.Logger(ctx).Info().Msg("Queried user: " + selectedUser.String())
-	} */
-
-	// ********** end of sample queries to test connection **********
-
+	d.token = token
 	d.db = db
 	return nil
 }
@@ -325,6 +161,9 @@ func (d *Destination) Teardown(_ context.Context) error {
 	// will be no more calls to any other function. After Teardown returns, the
 	// plugin should be ready for a graceful shutdown.
 	if d.db != nil {
+		if err := d.db.Invalidate(); err != nil {
+			return fmt.Errorf("failed to invalidate token: %w", err)
+		}
 		return d.db.Close()
 	}
 	return nil
