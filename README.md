@@ -42,8 +42,8 @@ A destination connector pushes data from upstream resources to an external resou
 
 ## Known Issues & Limitations
 
-- Known issue A
-- Limitation A
+- Batching doesn't work for Create, Update and Delete operations, as surrealdb doesn't have bulk mechanisms for those. Only Snapshot has batching. But the connector is built to easily implement batching when it becomes possible
+- 
 
 ## Planned work
 

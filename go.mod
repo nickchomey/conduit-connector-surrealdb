@@ -1,12 +1,13 @@
 module github.com/nickchomey/conduit-connector-surrealdb
 
-go 1.23
+go 1.23.2
+
 require (
 	github.com/conduitio/conduit-commons v0.4.0
 	github.com/conduitio/conduit-connector-sdk v0.11.0
 	github.com/golangci/golangci-lint v1.61.0
 	github.com/matryer/is v1.4.1
-	github.com/surrealdb/surrealdb.go v0.2.2-0.20241009120630-5bbb7b1e2a1b
+	github.com/surrealdb/surrealdb.go v0.2.2-0.20241017143703-08ad39f90b45
 	mvdan.cc/gofumpt v0.7.0
 )
 
