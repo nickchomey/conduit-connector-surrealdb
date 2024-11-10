@@ -8,17 +8,18 @@ import (
 )
 
 const (
-	ConfigDatabase  = "database"
-	ConfigNamespace = "namespace"
-	ConfigPassword  = "password"
-	ConfigScope     = "scope"
-	ConfigUrl       = "url"
-	ConfigUsername  = "username"
+	SourceConfigDatabase  = "database"
+	SourceConfigFoo       = "foo"
+	SourceConfigNamespace = "namespace"
+	SourceConfigPassword  = "password"
+	SourceConfigScope     = "scope"
+	SourceConfigUrl       = "url"
+	SourceConfigUsername  = "username"
 )
 
-func (Config) Parameters() map[string]config.Parameter {
+func (SourceConfig) Parameters() map[string]config.Parameter {
 	return map[string]config.Parameter{
-		ConfigDatabase: {
+		SourceConfigDatabase: {
 			Default:     "",
 			Description: "Database is the database name for the SurrealDB server.",
 			Type:        config.ParameterTypeString,
@@ -26,7 +27,15 @@ func (Config) Parameters() map[string]config.Parameter {
 				config.ValidationRequired{},
 			},
 		},
-		ConfigNamespace: {
+		SourceConfigFoo: {
+			Default:     "",
+			Description: "SourceConfigParam is named foo and must be provided by the user.",
+			Type:        config.ParameterTypeString,
+			Validations: []config.Validation{
+				config.ValidationRequired{},
+			},
+		},
+		SourceConfigNamespace: {
 			Default:     "",
 			Description: "Namespace is the namespace for the SurrealDB server.",
 			Type:        config.ParameterTypeString,
@@ -34,7 +43,7 @@ func (Config) Parameters() map[string]config.Parameter {
 				config.ValidationRequired{},
 			},
 		},
-		ConfigPassword: {
+		SourceConfigPassword: {
 			Default:     "",
 			Description: "Password is the password for the SurrealDB server.",
 			Type:        config.ParameterTypeString,
@@ -42,7 +51,7 @@ func (Config) Parameters() map[string]config.Parameter {
 				config.ValidationRequired{},
 			},
 		},
-		ConfigScope: {
+		SourceConfigScope: {
 			Default:     "",
 			Description: "Scope is the scope for the SurrealDB server.",
 			Type:        config.ParameterTypeString,
@@ -50,7 +59,7 @@ func (Config) Parameters() map[string]config.Parameter {
 				config.ValidationRequired{},
 			},
 		},
-		ConfigUrl: {
+		SourceConfigUrl: {
 			Default:     "",
 			Description: "URL is the connection string for the SurrealDB server.",
 			Type:        config.ParameterTypeString,
@@ -58,7 +67,7 @@ func (Config) Parameters() map[string]config.Parameter {
 				config.ValidationRequired{},
 			},
 		},
-		ConfigUsername: {
+		SourceConfigUsername: {
 			Default:     "",
 			Description: "Username is the username for the SurrealDB server.",
 			Type:        config.ParameterTypeString,
