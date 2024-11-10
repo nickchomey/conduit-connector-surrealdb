@@ -1,4 +1,4 @@
-package surrealdb_test
+package surrealdb
 
 import (
 	"context"
