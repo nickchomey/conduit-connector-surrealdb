@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	surrealdb "github.com/nickchomey/conduit-connector-surrealdb"
 	"github.com/matryer/is"
+	surrealdb "github.com/nickchomey/conduit-connector-surrealdb/source"
 )
 
 func TestTeardownSource_NoOpen(t *testing.T) {
