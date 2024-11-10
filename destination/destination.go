@@ -1,8 +1,12 @@
 package destination
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"os"
+	"strings"
+	"text/template"
 	"time"
 
 	//"strings"
@@ -15,6 +19,7 @@ import (
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/surrealdb/surrealdb.go"
 	"github.com/surrealdb/surrealdb.go/pkg/models"
+	"gopkg.in/yaml.v3"
 )
 
 type Destination struct {
@@ -23,6 +28,21 @@ type Destination struct {
 	config Config
 	db     *surrealdb.DB
 	token  string
+}
+
+type RelationEventConfig struct {
+	Name    string `yaml:"name"`
+	Trigger struct {
+		Table    string `yaml:"table"`
+		InField  string `yaml:"inField"`
+		OutField string `yaml:"outField"`
+	} `yaml:"trigger"`
+	InTable  string `yaml:"inTable"`
+	OutTable string `yaml:"outTable"`
+}
+
+type RelationSchema struct {
+	Relations []RelationEventConfig `yaml:"relations"`
 }
 
 func NewDestination() sdk.Destination {
@@ -85,6 +105,17 @@ func (d *Destination) Open(ctx context.Context) error {
 	if err != nil {
 		sdk.Logger(ctx).Error().Msg("Failed to sign in to SurrealDB: " + err.Error())
 		return fmt.Errorf("failed to sign in to SurrealDB: %w", err)
+	}
+
+	relations, err := loadRelationSchema("relations_schema.yaml")
+	if err != nil {
+		panic(err)
+	}
+
+	for _, config := range relations {
+		if err := createRelationEvent(db, config); err != nil {
+			fmt.Printf("failed to create relation %s: %v\n", config.Name, err)
+		}
 	}
 
 	d.token = token
@@ -167,6 +198,70 @@ func (d *Destination) Teardown(_ context.Context) error {
 		return d.db.Close()
 	}
 	return nil
+}
+
+func loadRelationSchema(filepath string) ([]RelationEventConfig, error) {
+	data, err := os.ReadFile(filepath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read schema file: %w", err)
+	}
+
+	var schema RelationSchema
+	if err := yaml.Unmarshal(data, &schema); err != nil {
+		return nil, fmt.Errorf("failed to parse schema: %w", err)
+	}
+
+	return schema.Relations, nil
+}
+
+func createRelationEvent(db *surrealdb.DB, config RelationEventConfig) error {
+	/* TODO: need to add something to allow for the conditionals to specified
+	- eg. perhaps event = create is default, likewise after.inField != NONE is default
+	- but also want to allow for other conditions to be specified
+		- probably needed for wp_bp_activity -> component and type fields
+		- even more likely for meta tables, where there's many keys and records that will need to be related to a single parent table record?
+			- perhaps best to use a schema to move meta table records/fields into the parent record as a nested object?
+	*/
+	tmpl := template.Must(template.New("event").Parse(`
+DEFINE EVENT IF NOT EXISTS {{.InTable}}_{{.Name}}_{{.OutTable}}_relation ON TABLE {{.Trigger.Table}} 
+WHEN $event = 'CREATE' 
+AND $after.{{.Trigger.InField}} != NONE 
+THEN {
+    LET $in = IF type::is::record($after.{{.Trigger.InField}}) {
+            $after.{{.Trigger.InField}} 
+        } ELSE {
+            type::thing('{{.InTable}}', $after.{{.Trigger.InField}})
+        };
+    LET $out = IF type::is::record($after.{{.Trigger.OutField}}) {
+            $after.{{.Trigger.OutField}}
+        } ELSE {
+            type::thing('{{.OutTable}}', $after.{{.Trigger.OutField}})
+        };
+    
+    RELATE $in->{{.Name}}->$out;
+};
+
+DEFINE INDEX {{.Name}}_unique_relationship 
+ON TABLE {{.Name}}
+COLUMNS in, out UNIQUE;`))
+
+	var query bytes.Buffer
+	if err := tmpl.Execute(&query, config); err != nil {
+		return err
+	}
+
+	queryString := strings.TrimSpace(query.String())
+	queryString = strings.ReplaceAll(queryString, "\n", " ")
+	queryString = strings.ReplaceAll(queryString, "\t", " ")
+	queryString = strings.ReplaceAll(queryString, "    ", " ")
+	_, err := surrealdb.Query[interface{}](db, queryString, nil)
+
+	//define unique index on relation table for the relation event just created
+	// DEFINE INDEX unique_relationships
+	// ON TABLE posted
+	// COLUMNS in, out UNIQUE;
+
+	return err
 }
 
 // Receive record and return pointer to modified payload
@@ -256,7 +351,7 @@ func (d *Destination) delete(ctx context.Context, tableName string, payloads []*
 			return fmt.Errorf("unexpected type for payload: %T", *payload)
 		}
 
-		if err := surrealdb.Delete(d.db, models.Table(tableName)); err != nil {
+		if _, err := surrealdb.Delete[interface{}](d.db, models.Table(tableName)); err != nil {
 			sdk.Logger(ctx).Error().Msg("Failed to insert record: " + err.Error())
 			return fmt.Errorf("failed to insert record: %w", err)
 		}
